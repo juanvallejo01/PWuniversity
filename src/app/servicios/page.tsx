@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import path from "node:path";
+import sharp from "sharp";
 import {
   getServices,
   getSiteSettings,
@@ -21,7 +23,7 @@ import { GiftTeaser } from "@/components/gift-teaser";
 export const metadata: Metadata = {
   title: "Servicios de terapia psicológica online",
   description:
-    "Valoración inicial, sesiones de terapia individual, taller de inteligencia emocional y programa de 8 sesiones. Terapia online en español con la psicóloga Bertha Upegui.",
+    "Valoración inicial, sesiones de terapia individual, talleres de inteligencia emocional y mapa de sueños, y programa de 8 sesiones. Terapia online en español con la psicóloga Bertha Upegui.",
   alternates: { canonical: "/servicios" },
   openGraph: { url: "/servicios", title: "Servicios de terapia psicológica online" },
 };
@@ -98,6 +100,17 @@ function ServicePrice({ serviceId, usd, cop }: { serviceId: string; usd: string 
   );
 }
 
+/** Las imágenes de servicios viven en /public; las verticales (p. ej. pósters) se muestran sin recortar. */
+async function isPortrait(src: string) {
+  if (!src.startsWith("/")) return false;
+  try {
+    const { width, height } = await sharp(path.join(process.cwd(), "public", src)).metadata();
+    return Boolean(width && height && height > width);
+  } catch {
+    return false;
+  }
+}
+
 export default async function ServiciosPage() {
   const [services, settings, paymentInfo, paymentMethods] = await Promise.all([
     getServices(true),
@@ -105,6 +118,9 @@ export default async function ServiciosPage() {
     getPaymentInfo(),
     getPaymentMethods(true),
   ]);
+  const portraitIds = new Set(
+    (await Promise.all(services.map(async (s) => (s.imageUrl && (await isPortrait(s.imageUrl)) ? s.id : null)))).filter(Boolean),
+  );
 
   const whatsappHref = buildWhatsappUrl(settings.whatsappNumber, settings.whatsappMessageTemplate);
   const isWhatsapp = settings.bookingMode === "whatsapp";
@@ -139,15 +155,15 @@ export default async function ServiciosPage() {
           <div className="grid sm:grid-cols-2 gap-6">
             {services.map((s, i) => (
               <Reveal key={s.id} delay={(i % 2) * 90} className={`h-full ${s.description.includes("•") || s.imageUrl ? "sm:col-span-2" : ""}`}>
-              <Card className={`h-full ${s.imageUrl ? "grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-6 md:gap-8 items-center !p-4 sm:!p-5" : ""}`}>
+              <Card className={`h-full ${s.imageUrl ? `grid ${portraitIds.has(s.id) ? "md:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] md:items-start" : "md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] items-center"} gap-6 md:gap-8 !p-4 sm:!p-5` : ""}`}>
                 {s.imageUrl && (
-                  <div className="relative aspect-video overflow-hidden rounded-xl border border-purple-100 bg-purple-50">
+                  <div className={`relative overflow-hidden rounded-xl border border-purple-100 bg-purple-50 ${portraitIds.has(s.id) ? "aspect-[2/3] w-full max-w-[19rem] mx-auto" : "aspect-video"}`}>
                     <Image
                       src={s.imageUrl}
                       alt={`${s.name}: ${s.duration || "con Bertha Upegui"}`}
                       fill
                       className="object-cover"
-                      sizes="(min-width: 1024px) 480px, (min-width: 640px) 45vw, 100vw"
+                      sizes={portraitIds.has(s.id) ? "(min-width: 768px) 304px, 90vw" : "(min-width: 1024px) 480px, (min-width: 640px) 45vw, 100vw"}
                     />
                   </div>
                 )}

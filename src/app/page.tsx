@@ -94,21 +94,17 @@ export default async function HomePage() {
             </ul>
           </div>
 
-          {/* Escenario del personaje */}
-          <div className="relative order-first lg:order-none mx-auto w-full mt-8 sm:mt-6 lg:mt-0 max-w-[14.5rem] sm:max-w-[18rem] lg:max-w-[26rem] aspect-[1/1.05] animate-fade-up [animation-delay:150ms]">
-            <div className="absolute inset-[4%] rounded-full bg-gradient-to-br from-white via-purple-100 to-aqua-100 shadow-xl shadow-purple-200/50" />
-            <div className="absolute inset-0 flex items-end justify-center pb-[4%]">
-              <AnimatedCharacter
-                character="wave"
-                inline
-                shadow
+          {/* Foto de Bertha */}
+          <div className="relative order-first lg:order-none mx-auto w-full mt-8 sm:mt-6 lg:mt-0 max-w-[15rem] sm:max-w-[18rem] lg:max-w-[22rem] animate-fade-up [animation-delay:150ms]">
+            <div className="absolute -inset-3 -rotate-3 rounded-[2rem] bg-gradient-to-br from-purple-200 via-lilac-100 to-aqua-100" />
+            <div className="relative aspect-[3/4] rounded-3xl overflow-hidden border-4 border-white shadow-xl shadow-purple-200/60">
+              <Image
+                src="/bertha/bertha-11.jpg"
+                alt={`${settings.siteName}, ${about.title.toLowerCase()}`}
+                fill
                 preload
-                position={{ width: 300 }}
-                entranceAnimation="rise"
-                scrollAnimation="hop"
-                interaction={["hover", "cursor-tilt"]}
-                delay={300}
-                visibleFrom="always"
+                className="object-cover"
+                sizes="(min-width: 1024px) 352px, (min-width: 640px) 288px, 240px"
               />
             </div>
             <div className="bubble absolute -left-[6%] -top-[9%] sm:-left-[2%] sm:top-[4%] whitespace-nowrap rounded-2xl rounded-bl-sm bg-white px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg shadow-purple-200/60 border border-purple-100">
@@ -138,18 +134,19 @@ export default async function HomePage() {
       <section className="relative overflow-hidden py-16 sm:py-24 section-tint">
         <Pattern />
         <Container className="relative grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] gap-10 lg:gap-16 items-center">
-          <Reveal className="mx-auto w-full max-w-[18rem] lg:max-w-none">
-            <div className="relative">
-              <div className="absolute -inset-3 -rotate-3 rounded-[2rem] bg-gradient-to-br from-purple-200 via-lilac-100 to-aqua-100" />
-              <div className="relative aspect-[3/4] rounded-3xl overflow-hidden border-4 border-white shadow-xl shadow-purple-200/60">
-                <Image
-                  src="/bertha/bertha-11.jpg"
-                  alt={`${settings.siteName}, ${about.title.toLowerCase()}`}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 320px, 288px"
-                />
-              </div>
+          <Reveal className="relative mx-auto w-full max-w-[18rem] lg:max-w-none aspect-[1/1.05]">
+            <div className="absolute inset-[4%] rounded-full bg-gradient-to-br from-white via-purple-100 to-aqua-100 shadow-xl shadow-purple-200/50" />
+            <div className="absolute inset-0 flex items-end justify-center pb-[4%]">
+              <AnimatedCharacter
+                character="wave"
+                inline
+                shadow
+                position={{ width: 280 }}
+                entranceAnimation="rise"
+                scrollAnimation="hop"
+                interaction={["hover", "cursor-tilt"]}
+                visibleFrom="always"
+              />
             </div>
           </Reveal>
           <Reveal delay={120} className="text-center lg:text-left">
