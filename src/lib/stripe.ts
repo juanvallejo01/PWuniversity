@@ -47,6 +47,8 @@ export async function createCheckoutSession({ serviceId, serviceName, price, cur
     mode: "payment",
     locale: "es-419",
     submit_type: "pay",
+    // La cuenta trae Managed Payments activo por defecto y exige un tax code por producto; se cobra como pago normal.
+    "managed_payments[enabled]": "false",
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": currency.toLowerCase(),
     "line_items[0][price_data][unit_amount]": String(toMinorUnits(price)),
