@@ -4,7 +4,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { put } from "@vercel/blob";
 
-// Con BLOB_READ_WRITE_TOKEN (lo crea Vercel al conectar un Blob store público al proyecto) las
+// Con un Blob store público conectado al proyecto (Vercel crea BLOB_READ_WRITE_TOKEN o BLOB_STORE_ID) las
 // imágenes se suben a Vercel Blob, porque en Vercel el disco es de solo lectura. Sin el token
 // (desarrollo local) se guardan en /public/uploads. Todos los formularios llaman solo a
 // `saveUploadedImage`.
@@ -24,7 +24,7 @@ export async function saveUploadedImage(file: File): Promise<string> {
   const ext = extensionFor(file.type);
   const filename = `${crypto.randomUUID()}${ext}`;
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) {
     const blob = await put(`uploads/${filename}`, file, { access: "public", contentType: file.type });
     return blob.url;
   }
