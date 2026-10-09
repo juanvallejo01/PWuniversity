@@ -100,11 +100,13 @@ function ServicePrice({ serviceId, usd, cop }: { serviceId: string; usd: string 
   );
 }
 
-/** Las imágenes de servicios viven en /public; las verticales (p. ej. pósters) se muestran sin recortar. */
+/** Las imágenes verticales (p. ej. pósters) se muestran sin recortar. Viven en /public o en Vercel Blob. */
 async function isPortrait(src: string) {
-  if (!src.startsWith("/")) return false;
   try {
-    const { width, height } = await sharp(path.join(process.cwd(), "public", src)).metadata();
+    const input = src.startsWith("/")
+      ? path.join(process.cwd(), "public", src)
+      : Buffer.from(await (await fetch(src, { next: { revalidate: 86400 } })).arrayBuffer());
+    const { width, height } = await sharp(input).metadata();
     return Boolean(width && height && height > width);
   } catch {
     return false;

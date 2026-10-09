@@ -2,13 +2,12 @@ import "server-only";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
+import { put } from "@vercel/blob";
 
-// Almacenamiento local en /public/uploads. Funciona en cualquier hosting
-// con sistema de archivos persistente (VPS, servidor propio, Docker con
-// volumen). Si el sitio se despliega en una plataforma serverless de solo
-// lectura (p. ej. Vercel), reemplazar esta función por una subida a un
-// servicio de blobs (Vercel Blob, S3, Cloudinary, etc.) sin tocar el resto
-// del código: todos los formularios llaman únicamente a `saveUploadedImage`.
+// Con BLOB_READ_WRITE_TOKEN (lo crea Vercel al conectar un Blob store público al proyecto) las
+// imágenes se suben a Vercel Blob, porque en Vercel el disco es de solo lectura. Sin el token
+// (desarrollo local) se guardan en /public/uploads. Todos los formularios llaman solo a
+// `saveUploadedImage`.
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
@@ -22,10 +21,15 @@ export async function saveUploadedImage(file: File): Promise<string> {
     throw new Error("La imagen supera el tamaño máximo permitido (8MB).");
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-
   const ext = extensionFor(file.type);
   const filename = `${crypto.randomUUID()}${ext}`;
+
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`uploads/${filename}`, file, { access: "public", contentType: file.type });
+    return blob.url;
+  }
+
+  await mkdir(UPLOAD_DIR, { recursive: true });
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(path.join(UPLOAD_DIR, filename), buffer);
 
